@@ -1,0 +1,52 @@
+import RPi.GPIO as GPIO
+import time
+import threading
+
+# Установка GPIO
+GPIO.setmode(GPIO.BCM)
+
+# Пины для сервопривода
+SERVO_PIN = 17
+GPIO.setup(SERVO_PIN, GPIO.OUT)
+
+# Пины для датчика расстояния
+TRIG_PIN = 23
+ECHO_PIN = 24
+GPIO.setup(TRIG_PIN, GPIO.OUT)
+GPIO.setup(ECHO_PIN, GPIO.IN)
+
+# Функция для управления сервоприводом
+def set_servo_angle(angle):
+    duty = angle / 180 * 2 + 1
+    GPIO.output(SERVO_PIN, GPIO.HIGH)
+    time.sleep(0.5 * duty)
+    GPIO.output(SERVO_PIN, GPIO.LOW)
+    time.sleep(0.5 * (1 - duty))
+
+# Чтения данных с датчика расстояния
+def read_distance():
+    GPIO.output(TRIG_PIN, GPIO.HIGH)
+    time.sleep(0.01)
+    GPIO.output(TRIG_PIN, GPIO.LOW)
+    while GPIO.input(ECHO_PIN) == 0:
+        pulse_start = time.time()
+    while GPIO.input(ECHO_PIN) == 1:
+        pulse_end = time.time()
+    pulse_duration = pulse_end - pulse_start
+    distance = pulse_duration * 34000 / 2
+    return distance
+
+
+while True:
+    # Читаем расстояние
+    distance = read_distance()
+    print(f"Distance: {distance} cm")
+
+    #Серва
+    set_servo_angle(90)
+
+    
+    time.sleep(1)
+
+
+GPIO.cleanup()

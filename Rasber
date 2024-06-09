@@ -1,0 +1,31 @@
+import serial
+import time
+import csv
+
+
+ser = serial.Serial('/dev/ttyS0', 11520000, timeout=1)
+
+
+with open('data.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Time', 'Data'])
+
+# Цикл для сбора и отправки данных
+while True:
+    #
+    data = ser.readline().decode().strip()
+    print(f"Received data: {data}")
+
+   
+    with open('data.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([time.strftime('%Y-%m-%d %H:%M:%S'), data])
+
+    
+    ser.write(data.encode())
+
+   
+    time.sleep(1)
+
+
+ser.close()
